@@ -1,22 +1,10 @@
-# Core framework
 fastapi==0.115.14
-uvicorn[standard]==0.35.0
-
-# Database (PostgreSQL)
-psycopg[binary]==3.2.9
-
-# Redis
-redis==6.2.0
-
-# Security and Auth
+uvicorn[standard]==0.35.0 
+psycopg[pool,binary]==3.2.9
 python-jose[cryptography]==3.5.0
 passlib[bcrypt]==1.7.4
 python-dotenv==1.1.1
-
-# OAuth support
-authlib==1.6.0
-
-# Pydantic for config management (optional if using settings)
+#pydantic==2.11.7
+pydantic[email]==2.11.7
 pydantic-settings==2.10.1
-
- 
+bcrypt==4.0.1

@@ -1,30 +1,27 @@
 from fastapi import FastAPI
-from starlette.middleware.cors import CORSMiddleware
-import os
+from fastapi.middleware.cors import CORSMiddleware
+from app.router import api_router
+from app.db.pool import get_pool, init_pool
+from app.common.exceptions import register_exception_handlers
 
-app = FastAPI(
-    title="TimePush API",
-    version="0.1.0",
-    description="Core API for the TimePush platform"
-)
+app = FastAPI()
 
-# CORS  
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  
+    allow_origins=["*"],  # adjust as needed
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Hello World route
-@app.get("/hello", tags=["Hello"])
-def hello_world():
-    return {"message": "Hello, world!"}
+register_exception_handlers(app)
+app.include_router(api_router)
 
-# Health check
-@app.get("/", tags=["Health"])
-def root():
-    return {"message": "TimePush API is running"}
+@app.on_event("startup")
+async def startup_event():
+    init_pool()
+    await get_pool().open()
 
-
+@app.on_event("shutdown")
+async def shutdown_event():
+    await get_pool().close()
