@@ -16,14 +16,16 @@ def verify_password(password: str, hash: str) -> bool:
 
 # JWT helpers
 
-def create_jwt_token(user_id: str, expires_delta: int = None) -> str:
-    expire = datetime.utcnow() + timedelta(seconds=expires_delta or 900)  # 15 min default
-    to_encode = {"sub": user_id, "exp": expire}
+def create_jwt_token(user_id: str, expires_delta: int = None) -> str: 
+    user_id_str = str(user_id)
+    expire = datetime.utcnow() + timedelta(seconds=expires_delta or 900)
+    to_encode = {"sub": user_id_str, "exp": expire}
     return jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHM)
 
 def create_refresh_token(user_id: str) -> str:
+    user_id_str = str(user_id)
     expire = datetime.utcnow() + timedelta(days=7)
-    to_encode = {"sub": user_id, "exp": expire, "type": "refresh"}
+    to_encode = {"sub": user_id_str, "exp": expire, "type": "refresh"}
     return jwt.encode(to_encode, settings.JWT_SECRET, algorithm=ALGORITHM)
 
 def decode_jwt_token(token: str) -> dict:

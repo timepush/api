@@ -28,7 +28,7 @@ async def global_exception_handler(request: Request, exc: Exception):
         return format_error("Unique constraint violated", "db_error", 400, code="unique_violation")
 
     traceback.print_exception(type(exc), exc, exc.__traceback__)
-    return format_error("Internal server error", "internal_error", 500)
+    return format_error(str(exc), "internal_error", 500)
 
 # ✅ Register all at once
 def register_exception_handlers(app: FastAPI):

@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     DATABASE_URL: str
-    SECRET_KEY: str
+    JWT_SECRET: str
     GOOGLE_CLIENT_ID: str
     FACEBOOK_APP_ID: str
     TOKEN_EXPIRE_SECONDS: int = 3600
