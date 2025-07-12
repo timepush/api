@@ -20,3 +20,6 @@ class UserInOAuth(BaseModel):
 
 class TokenOut(BaseModel):
     token: str
+
+class RefreshRequest(BaseModel):
+    refresh_token: str

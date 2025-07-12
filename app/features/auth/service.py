@@ -1,6 +1,6 @@
 from psycopg import AsyncCursor
 from app.db.pool import get_pool
-from app.common.security import hash_password, verify_password, create_jwt_token
+from app.common.security import hash_password, verify_password, create_jwt_token, create_refresh_token, decode_jwt_token
 from app.features.auth.models import UserInManual, UserInOAuth
 
 class InvalidCredentialsError(Exception): pass
@@ -27,7 +27,7 @@ async def signup_manual(user: UserInManual):
                     hash_password(user.password)
                 ))
 
-async def login_manual(email: str, password: str) -> str:
+async def login_manual(email: str, password: str):
     async with get_pool().connection() as conn:
         async with conn.cursor() as cur:
             await cur.execute("""
@@ -47,9 +47,12 @@ async def login_manual(email: str, password: str) -> str:
             if not is_verified:
                 raise NotVerifiedError()
 
-            return create_jwt_token(user_id)
+            access_token = create_jwt_token(user_id)
+            refresh_token = create_refresh_token(user_id)
 
-async def login_or_register_oauth(user: UserInOAuth) -> str:
+            return access_token, refresh_token
+
+async def login_or_register_oauth(user: UserInOAuth):
     async with get_pool().connection() as conn:
         async with conn.transaction():
             async with conn.cursor() as cur:
@@ -74,4 +77,14 @@ async def login_or_register_oauth(user: UserInOAuth) -> str:
                     ))
                     user_id = (await cur.fetchone())[0]
 
+    access_token = create_jwt_token(user_id)
+    refresh_token = create_refresh_token(user_id)
+
+    return access_token, refresh_token
+
+async def refresh_access_token(refresh_token: str) -> str:
+    payload = decode_jwt_token(refresh_token)
+    if payload.get("type") != "refresh":
+        raise Exception("Invalid refresh token")
+    user_id = payload.get("sub")
     return create_jwt_token(user_id)
